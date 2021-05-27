@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CoreCodeCamp.Data;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +12,26 @@ namespace CoreCodeCamp.Controllers
     [Route("api/[controller]")] // [controller] inserts whatever is in front of Controller in class name
     public class CampsController : ControllerBase
     {
-        public object Get()
+        private readonly ICampRepository repository;
+
+        public CampsController(ICampRepository repository)
         {
-            return new { Moniker = "ATL2018", Name = "Atlanta Code Camp" };
+            this.repository = repository;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            try
+            {
+                var results = await repository.GetAllCampsAsync();
+
+                return Ok(results);
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+            }
         }
     }
 }
