@@ -1,4 +1,6 @@
-﻿using CoreCodeCamp.Data;
+﻿using AutoMapper;
+using CoreCodeCamp.Data;
+using CoreCodeCamp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -12,11 +14,13 @@ namespace CoreCodeCamp.Controllers
     [Route("api/[controller]")] // [controller] inserts whatever is in front of Controller in class name
     public class CampsController : ControllerBase
     {
-        private readonly ICampRepository repository;
+        private readonly ICampRepository _repository;
+        private readonly IMapper _mapper;
 
-        public CampsController(ICampRepository repository)
+        public CampsController(ICampRepository repository, IMapper mapper)
         {
-            this.repository = repository;
+            _repository = repository;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -24,9 +28,11 @@ namespace CoreCodeCamp.Controllers
         {
             try
             {
-                var results = await repository.GetAllCampsAsync();
+                var results = await _repository.GetAllCampsAsync();
 
-                return Ok(results);
+                CampModel[] models = _mapper.Map<CampModel[]>(results);
+
+                return Ok(models);
             }
             catch (Exception)
             {
